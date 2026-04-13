@@ -1,0 +1,6 @@
+* @SebastianOrtega
+
+release/* @SebastianOrtega
+menubar-app/project.yml @SebastianOrtega
+scripts/notarize-menubar-app.sh @SebastianOrtega
+scripts/install-menubar-app.sh @SebastianOrtega

@@ -1,133 +1,241 @@
 # Dev Dashboard
 
-Herramienta local para macOS orientada a desarrolladores que muestra procesos de desarrollo escuchando puertos y permite cerrarlos desde una UI simple.
+Dev Dashboard is a local macOS tool for developers that shows development processes listening on ports and lets you stop them from a fast, readable UI.
 
-## Qué hace
+![Dev Dashboard Screenshot](./screenshoot.png)
 
-- Detecta procesos de desarrollo que estén escuchando puertos TCP.
-- Muestra PID, nombre, comando completo, puertos, dirección, runtime, carpeta de trabajo y tipo estimado.
-- Resalta procesos duplicados o sospechosos.
-- Permite refrescar manualmente, usar auto refresh, buscar y cerrar procesos.
-- Permite cerrar todos los procesos asociados a una misma carpeta cuando se puede inferir.
+## Author
+
+Sebastian Ortega
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](./LICENSE).
+
+## Prebuilt App
+
+This repository includes a prebuilt notarized macOS app for users who do not want to compile it locally:
+
+- `release/Dev Dashboard.app`
+- `release/Dev Dashboard.zip`
+- `release/SHA256SUMS.txt`
+
+If you download the repository as a zip from GitHub, you can open the app directly from the `release/` folder.
+
+## Release Policy
+
+- Source code contributions are welcome through pull requests.
+- Prebuilt release artifacts in `release/` are maintained by Sebastian Ortega.
+- Contributors should not replace the bundled `.app`, `.zip`, or checksum files unless a release update has been explicitly requested.
+- Official release artifacts should only be updated from a signed and notarized build.
+
+## What It Does
+
+- Detects development processes listening on TCP ports.
+- Shows PID, process name, full command, ports, address, runtime, working directory, and estimated app type.
+- Highlights duplicated or suspicious processes.
+- Supports manual refresh, auto refresh, search, and process termination.
+- Can terminate all processes associated with the same project folder when that can be inferred.
 
 ## Stack
 
 - Frontend: React + Vite
 - Backend: Node.js + Express
-- Detección del sistema: `lsof` + `ps`
+- System detection: `lsof` + `ps`
+- Native menubar app: Swift + SwiftUI + MenuBarExtra
 
-## Arquitectura mínima
+## Minimal Architecture
 
 ```text
 dev_dashboard/
-├── client/               # UI React/Vite
+├── client/               # React/Vite UI
 │   ├── src/App.jsx
 │   ├── src/main.jsx
 │   └── src/styles.css
-├── server/               # API local + detector macOS
+├── server/               # Local API + macOS detector
 │   └── src/
 │       ├── config.js
 │       ├── index.js
 │       └── processScanner.js
-├── package.json          # scripts raíz
+├── menubar-app/          # Native Swift app
+├── release/              # Prebuilt notarized app assets
+├── package.json          # Root scripts and metadata
 └── README.md
 ```
 
-## Requisitos
+## Requirements
 
 - macOS
-- Node.js 20+ recomendado
-- npm 10+ recomendado
+- Node.js 20+ recommended
+- npm 10+ recommended
+- Xcode 15+ to package the menubar app as a `.app`
+- XcodeGen (`brew install xcodegen`) to regenerate the native project
 
-## Instalación
+## Installation
 
 ```bash
 npm install
 ```
 
-## Cómo correrlo
+## How To Run
 
-### Desarrollo completo
+### Full Development Mode
 
-Arranca backend y frontend con un solo comando:
+Starts backend and frontend with a single command:
 
 ```bash
 npm run dev
 ```
 
-### Solo backend
+### Backend Only
 
 ```bash
 npm run server
 ```
 
-### Solo frontend
+### Frontend Only
 
 ```bash
 npm run client
 ```
 
-## URLs locales
+### Native Menubar App
+
+Build and run the menu bar app:
+
+```bash
+npm run menubar:run
+```
+
+Build only:
+
+```bash
+npm run menubar:build
+```
+
+You can also open the Swift package in Xcode:
+
+```bash
+open menubar-app/Package.swift
+```
+
+Generated Xcode project:
+
+```bash
+npm run menubar:project
+npm run menubar:open
+```
+
+Archive from the command line:
+
+```bash
+npm run menubar:archive
+```
+
+Install locally into `/Applications`:
+
+```bash
+npm run menubar:install
+```
+
+This generates the icons, rebuilds the `.xcodeproj`, creates a Release archive, and copies `Dev Dashboard.app` into `/Applications`.
+
+Notarize the exported app:
+
+```bash
+npm run menubar:notarize
+```
+
+The script first looks for `APPLE_NOTARYTOOL_PROFILE` in Keychain. If it is not available, it falls back to `APPLE_ID`, `APPLE_TEAM_ID`, and `APPLE_APP_PASSWORD`.
+
+## Local URLs
 
 - UI: [http://127.0.0.1:7001](http://127.0.0.1:7001)
 - API: [http://127.0.0.1:7000/api/processes](http://127.0.0.1:7000/api/processes)
 
-La herramienta escucha solo en `127.0.0.1`.
+The tool listens only on `127.0.0.1`.
 
-## Scripts npm
+## npm Scripts
 
-- `npm run dev`: levanta backend + frontend.
-- `npm run server`: arranca el backend local.
-- `npm run client`: arranca la UI local.
-- `npm run build`: genera build del frontend.
-- `npm run start`: arranca el backend sin watch.
+- `npm run dev`: starts backend + frontend.
+- `npm run server`: starts the local backend.
+- `npm run client`: starts the local UI.
+- `npm run menubar:run`: runs the Swift menubar app.
+- `npm run menubar:build`: builds the Swift menubar app.
+- `npm run menubar:icon`: generates the full PNG icon set for `AppIcon`.
+- `npm run menubar:project`: generates the `.xcodeproj` with XcodeGen.
+- `npm run menubar:open`: opens the menubar Xcode project.
+- `npm run menubar:archive`: creates a Release `.xcarchive` through Xcode build tools.
+- `npm run menubar:install`: installs a local build of the menubar app into `/Applications`.
+- `npm run menubar:notarize`: zips the exported `.app`, submits it to Apple, applies `staple`, and validates Gatekeeper.
+- `npm run build`: builds the frontend.
+- `npm run start`: starts the backend without watch mode.
 
-## Qué comandos del sistema usa
+## Native Menubar App
 
-La detección se apoya en comandos nativos de macOS:
+The `menubar-app/` folder contains a native Swift version that does not depend on the Node backend for process detection. It reimplements the detector using the same system commands and provides:
 
-### 1. Sockets TCP en escucha
+- always-on access from the macOS menu bar
+- manual and automatic refresh
+- native `Launch at Login` toggle using `SMAppService.mainApp`
+- search by PID, port, name, or command
+- frontend/backend/duplicated/suspicious badges
+- process detail view with useful terminal commands
+- process or project termination with confirmation
+
+Assets and packaging:
+
+- `scripts/generate-menubar-icons.swift` generates `AppIcon.appiconset`
+- `scripts/install-menubar-app.sh` builds and installs a local `.app` into `/Applications`
+- `scripts/notarize-menubar-app.sh` notarizes the exported `.app`
+- `menubar-app/project.yml` defines the bundle id, `LSUIElement`, category, and asset catalog for the Xcode project
+
+## System Commands Used
+
+Detection relies on native macOS commands:
+
+### 1. Listening TCP sockets
 
 ```bash
 lsof -nP -iTCP -sTCP:LISTEN -Fpcn
 ```
 
-Se usa para obtener:
+Used to obtain:
 
 - PID
-- nombre corto del proceso
-- sockets en escucha
-- puerto y dirección detectada
+- short process name
+- listening sockets
+- detected port and address
 
-### 2. Detalle del proceso
+### 2. Process details
 
 ```bash
 ps -ww -o pid=,ppid=,user=,etime=,args= -p <pid-list>
 ```
 
-Se usa para obtener:
+Used to obtain:
 
-- comando completo
-- usuario
-- tiempo de ejecución aproximado
+- full command
+- user
+- approximate runtime
 
-### 3. Carpeta de trabajo
+### 3. Working directory
 
 ```bash
 lsof -a -d cwd -p <pid-list> -Fn
 ```
 
-Se usa para inferir la carpeta del proyecto cuando el proceso lo permite.
+Used to infer the project folder when the process exposes it.
 
-## API local
+## Local API
 
 ### `GET /api/health`
 
-Healthcheck simple.
+Simple healthcheck.
 
 ### `GET /api/processes`
 
-Devuelve JSON estructurado con:
+Returns structured JSON with:
 
 - `processes`
 - `summary`
@@ -144,7 +252,7 @@ Body:
 }
 ```
 
-Intenta `SIGTERM` primero. Si el proceso sigue vivo, la UI puede ofrecer forzar cierre.
+Attempts `SIGTERM` first. If the process is still alive, the UI can offer a forced shutdown.
 
 ### `POST /api/projects/terminate`
 
@@ -152,46 +260,62 @@ Body:
 
 ```json
 {
-  "cwd": "/ruta/del/proyecto",
+  "cwd": "/path/to/project",
   "force": false
 }
 ```
 
-Termina todos los procesos detectados con la misma carpeta de trabajo.
+Terminates all detected processes with the same working directory.
 
-## Criterios cubiertos en esta primera versión
+## Scope Covered In This First Version
 
-- Tabla con PID, proceso, comando, puertos, dirección, runtime, cwd y tipo estimado.
-- Filtro rápido por PID, puerto, nombre, comando o carpeta.
-- Refresh manual.
-- Auto refresh cada pocos segundos.
-- Botón para copiar comando.
-- Botón para matar proceso.
-- Acción para matar proyecto desde el detalle.
-- Confirmación antes de cerrar procesos.
-- `SIGTERM` primero, `SIGKILL` solo si hace falta.
-- Exclusión explícita de los puertos `7000` y `7001` para no listar la propia herramienta.
+- Table with PID, process, command, ports, address, runtime, cwd, and estimated type.
+- Fast filter by PID, port, name, command, or folder.
+- Manual refresh.
+- Auto refresh every few seconds.
+- Copy command button.
+- Kill process button.
+- Kill project action from the detail panel.
+- Confirmation before stopping processes.
+- `SIGTERM` first, `SIGKILL` only if needed.
+- Explicit exclusion of ports `7000` and `7001` so the tool does not list itself.
 
-## Validación hecha
+## Validation Performed
 
-Se probó el flujo real en macOS con:
+The real flow was tested on macOS with:
 
-- detección de un servidor Vite real
-- detección de un backend Node real
-- cierre de ambos usando el propio API del dashboard
-- refresco posterior confirmando que desaparecieron de la lista
+- detection of a real Vite server
+- detection of a real Node backend
+- termination of both through the dashboard API itself
+- refresh afterward confirming that both disappeared from the list
+- clean compilation of the Swift menubar app with `swift build --package-path menubar-app`
+- real startup of the Swift menubar app as a native process
+- correct generation of the Xcode project with `xcodegen`
+- successful `.xcodeproj` build with `xcodebuild`
+- successful signing and notarization of the exported `.app`
 
-## Limitaciones conocidas
+## Security And Scope
 
-- La clasificación es heurística. Vite y Next son bastante confiables; otros servidores pueden quedar como `unknown`.
-- Solo se consideran sockets TCP en estado `LISTEN`. No se muestran procesos que no estén escuchando puerto.
-- Algunos procesos del sistema o apps protegidas pueden no exponer `cwd`, por lo que la carpeta puede salir como `desconocido`.
-- El cierre de procesos depende de permisos del usuario actual. No intenta escalar privilegios.
-- Si un proceso reutiliza puertos o expone múltiples sockets atípicos, la señalización de duplicados puede no ser perfecta.
-- Esta primera versión está pensada para macOS; no está adaptada a Linux o Windows.
+- The web UI and backend listen only on `127.0.0.1`.
+- Detection is performed locally with `lsof` and `ps`.
+- Process termination always requires explicit user action from the UI.
+- No runtime telemetry or external network service is required for normal use.
+- The only external service used in the release workflow is Apple notarization, and only when you explicitly run it.
 
-## Notas de uso
+## Known Limitations
 
-- Si ves varios procesos con la misma carpeta y tipo, revísalos como posible duplicidad.
-- Si un proceso no cae con cierre normal, la UI te ofrece forzar el cierre.
-- La herramienta no se expone fuera de localhost.
+- Classification is heuristic. Vite and Next are fairly reliable; other servers may remain `unknown`.
+- Only TCP sockets in `LISTEN` state are considered. Processes without an open listening port are not shown.
+- Some protected system processes or apps may not expose `cwd`, so the folder may appear as `unknown`.
+- Process termination depends on the current user permissions. It does not attempt privilege escalation.
+- `Launch at Login` uses `SMAppService`, but Apple requires a signed app. The build installed by `npm run menubar:install` is useful for local use; for reliable auto-start you should archive and sign from Xcode with your Team.
+- If a process reuses ports or exposes multiple unusual sockets, duplicate detection may not be perfect.
+- This first version is designed for macOS and is not adapted to Linux or Windows.
+- The menubar app is distributed as an executable Swift package; for a fully packaged signed `.app`, opening `menubar-app/Package.swift` in Xcode and archiving from there is the most practical route.
+- The `Launch at Login` toggle requires a properly signed app; from `swift run` or unsigned builds it may fail with an invalid-signature error.
+
+## Usage Notes
+
+- If you see several processes with the same folder and type, treat them as potential duplicates.
+- If a process does not stop with a normal shutdown, the UI offers a forced stop.
+- The tool is never exposed outside localhost.

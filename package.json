@@ -1,7 +1,28 @@
 {
-  "name": "dev-dashboard",
+  "name": "dev-dashboard-macos",
   "private": true,
-  "description": "Local macOS dashboard for active development processes and ports.",
+  "version": "0.1.0",
+  "description": "Local macOS dashboard for development processes, active ports, and menu bar monitoring.",
+  "license": "MIT",
+  "author": "Sebastian Ortega",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SebastianOrtega/dev-dashboard-macos.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SebastianOrtega/dev-dashboard-macos/issues"
+  },
+  "homepage": "https://github.com/SebastianOrtega/dev-dashboard-macos#readme",
+  "keywords": [
+    "macos",
+    "developer-tools",
+    "menubar",
+    "swiftui",
+    "react",
+    "nodejs",
+    "ports",
+    "process-monitor"
+  ],
   "workspaces": [
     "server",
     "client"
@@ -11,6 +32,14 @@
     "dev": "concurrently -n server,client -c blue,green \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
     "server": "npm run dev --workspace server",
     "client": "npm run dev --workspace client",
+    "menubar:run": "swift run --package-path menubar-app",
+    "menubar:build": "swift build --package-path menubar-app",
+    "menubar:icon": "swift ./scripts/generate-menubar-icons.swift",
+    "menubar:project": "cd menubar-app && xcodegen generate",
+    "menubar:open": "open menubar-app/DevDashboardMenuBar.xcodeproj",
+    "menubar:archive": "xcodebuild -project menubar-app/DevDashboardMenuBar.xcodeproj -scheme DevDashboardMenuBar -configuration Release archive -archivePath menubar-app/build/DevDashboardMenuBar.xcarchive",
+    "menubar:install": "zsh ./scripts/install-menubar-app.sh",
+    "menubar:notarize": "zsh ./scripts/notarize-menubar-app.sh",
     "build": "npm run build --workspace client",
     "start": "npm run start --workspace server"
   },
