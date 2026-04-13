@@ -20,7 +20,7 @@ This repository includes a prebuilt notarized macOS app for users who do not wan
 - `release/Dev Dashboard.zip`
 - `release/SHA256SUMS.txt`
 
-If you download the repository as a zip from GitHub, you can open the app directly from the `release/` folder.
+For the best user experience, download and extract `release/Dev Dashboard.zip` rather than opening the `.app` directly from a GitHub-generated source archive.
 
 ## Release Policy
 
@@ -147,6 +147,8 @@ npm run menubar:notarize
 ```
 
 The script first looks for `APPLE_NOTARYTOOL_PROFILE` in Keychain. If it is not available, it falls back to `APPLE_ID`, `APPLE_TEAM_ID`, and `APPLE_APP_PASSWORD`.
+
+Before exporting for your own Apple account, update `menubar-app/ExportOptions.plist` with your Team ID or generate an equivalent export options file locally.
 
 ## Local URLs
 
