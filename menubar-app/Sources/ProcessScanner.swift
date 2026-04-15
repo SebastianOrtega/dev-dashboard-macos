@@ -447,7 +447,7 @@ struct ProcessScanner {
                 WarningBanner(
                     type: "multi-dev-ports",
                     level: "warning",
-                    message: "Hay varios procesos ocupando puertos típicos de desarrollo."
+                    message: "Several processes are using typical development ports."
                 )
             )
         }
@@ -457,7 +457,7 @@ struct ProcessScanner {
                 WarningBanner(
                     type: "duplicates",
                     level: "warning",
-                    message: "Se detectaron procesos parecidos o posiblemente duplicados."
+                    message: "Similar or possibly duplicated processes were detected."
                 )
             )
         }
@@ -467,7 +467,7 @@ struct ProcessScanner {
                 WarningBanner(
                     type: "same-project",
                     level: "warning",
-                    message: "Hay más de un proceso escuchando desde la misma carpeta de proyecto."
+                    message: "More than one process is listening from the same project folder."
                 )
             )
         }
@@ -495,7 +495,7 @@ struct ProcessScanner {
     }
 
     private func formatRuntime(_ seconds: Int?) -> String {
-        guard let seconds else { return "desconocido" }
+        guard let seconds else { return "unknown" }
 
         let days = seconds / 86_400
         let hours = (seconds % 86_400) / 3_600

@@ -15,7 +15,7 @@ final class DashboardStore: ObservableObject {
         didSet { configureRefreshLoop() }
     }
     @Published private(set) var launchAtLoginEnabled = false
-    @Published private(set) var launchAtLoginStatusText = "No configurado"
+    @Published private(set) var launchAtLoginStatusText = "Not configured"
     @Published private(set) var launchAtLoginRequiresApproval = false
 
     private let scanner = ProcessScanner()
@@ -124,23 +124,23 @@ final class DashboardStore: ObservableObject {
         case .enabled:
             launchAtLoginEnabled = true
             launchAtLoginRequiresApproval = false
-            launchAtLoginStatusText = "Activo"
+            launchAtLoginStatusText = "Enabled"
         case .requiresApproval:
             launchAtLoginEnabled = false
             launchAtLoginRequiresApproval = true
-            launchAtLoginStatusText = "Requiere aprobación"
+            launchAtLoginStatusText = "Approval required"
         case .notFound:
             launchAtLoginEnabled = false
             launchAtLoginRequiresApproval = false
-            launchAtLoginStatusText = "No encontrado"
+            launchAtLoginStatusText = "Not found"
         case .notRegistered:
             launchAtLoginEnabled = false
             launchAtLoginRequiresApproval = false
-            launchAtLoginStatusText = "Inactivo"
+            launchAtLoginStatusText = "Disabled"
         @unknown default:
             launchAtLoginEnabled = false
             launchAtLoginRequiresApproval = false
-            launchAtLoginStatusText = "Desconocido"
+            launchAtLoginStatusText = "Unknown"
         }
     }
 }
