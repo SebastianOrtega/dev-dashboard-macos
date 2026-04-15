@@ -36,13 +36,14 @@ For the best user experience, download and extract `release/Dev Dashboard.zip` r
 - Highlights duplicated or suspicious processes.
 - Supports manual refresh, auto refresh, search, and process termination.
 - Can terminate all processes associated with the same project folder when that can be inferred.
+- Opens from a left click on the menu bar icon and shows a quick quit menu on right click.
 
 ## Stack
 
 - Frontend: React + Vite
 - Backend: Node.js + Express
 - System detection: `lsof` + `ps`
-- Native menubar app: Swift + SwiftUI + MenuBarExtra
+- Native menubar app: SwiftUI + AppKit (`NSStatusItem` + `NSPopover`)
 
 ## Minimal Architecture
 
@@ -138,7 +139,17 @@ Install locally into `/Applications`:
 npm run menubar:install
 ```
 
-This generates the icons, rebuilds the `.xcodeproj`, creates a Release archive, and copies `Dev Dashboard.app` into `/Applications`.
+This generates the icons, rebuilds the `.xcodeproj`, creates a signed Release archive, exports a signed `Dev Dashboard.app`, and copies it into `/Applications`.
+
+By default the installer tries to use the first available `Developer ID Application` identity in your Keychain. If none is available, it falls back to `Apple Development`.
+
+You can override signing explicitly:
+
+```bash
+DEV_DASHBOARD_CODE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
+DEV_DASHBOARD_TEAM_ID="TEAMID" \
+npm run menubar:install
+```
 
 Notarize the exported app:
 
@@ -147,8 +158,6 @@ npm run menubar:notarize
 ```
 
 The script first looks for `APPLE_NOTARYTOOL_PROFILE` in Keychain. If it is not available, it falls back to `APPLE_ID`, `APPLE_TEAM_ID`, and `APPLE_APP_PASSWORD`.
-
-Before exporting for your own Apple account, update `menubar-app/ExportOptions.plist` with your Team ID or generate an equivalent export options file locally.
 
 ## Local URLs
 
@@ -178,6 +187,7 @@ The tool listens only on `127.0.0.1`.
 The `menubar-app/` folder contains a native Swift version that does not depend on the Node backend for process detection. It reimplements the detector using the same system commands and provides:
 
 - always-on access from the macOS menu bar
+- left-click popover plus right-click quit menu on the menu bar icon
 - manual and automatic refresh
 - native `Launch at Login` toggle using `SMAppService.mainApp`
 - search by PID, port, name, or command
@@ -188,7 +198,7 @@ The `menubar-app/` folder contains a native Swift version that does not depend o
 Assets and packaging:
 
 - `scripts/generate-menubar-icons.swift` generates `AppIcon.appiconset`
-- `scripts/install-menubar-app.sh` builds and installs a local `.app` into `/Applications`
+- `scripts/install-menubar-app.sh` archives, signs, exports, and installs a local `.app` into `/Applications`
 - `scripts/notarize-menubar-app.sh` notarizes the exported `.app`
 - `menubar-app/project.yml` defines the bundle id, `LSUIElement`, category, and asset catalog for the Xcode project
 
