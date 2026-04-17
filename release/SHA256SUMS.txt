@@ -1,2 +1,2 @@
-1f3a7c4c4916b759543d117bc0e3e3e1064dd7d7118a05a815ebedba3bb85e9e  Dev Dashboard.app/Contents/MacOS/Dev Dashboard
-92d9572d7e6628add098c84aa8d92290183005dceaee459d84791c653a43b712  Dev Dashboard.zip
+07967b5b7855369cd3fa0615ed2cc93c71a912898c7ca63e14ded260db7ded5b  Dev Dashboard.app/Contents/MacOS/Dev Dashboard
+b3da0978beaff4b6247d9ead7d1a86a6376b416c6f9e6262b1148708fd1421be  Dev Dashboard.zip

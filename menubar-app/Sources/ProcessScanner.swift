@@ -3,7 +3,10 @@ import Foundation
 
 struct ProcessScanner {
     private let excludedPorts: Set<Int> = [7000, 7001]
-    private let typicalDevPorts: Set<Int> = [3000, 3001, 4000, 4100, 4173, 4200, 4321, 5000, 5173, 5174, 8000, 8080, 8787]
+    private let typicalDevPorts: Set<Int> = [
+        3000, 3001, 3002, 3333, 4000, 4100, 4173, 4200, 4321, 5000, 5173, 5174, 5175,
+        5500, 6006, 8000, 8080, 8081, 8787, 8888, 9000
+    ]
     private let frontendHints = [
         "vite",
         "next dev",
@@ -372,6 +375,11 @@ struct ProcessScanner {
             .compactMap { $0 }
             .joined(separator: " ")
             .lowercased()
+        let nameAndCommand = [process.name, process.command]
+            .compactMap { $0 }
+            .joined(separator: " ")
+            .lowercased()
+        let hasTypicalDevPort = process.ports.contains { typicalDevPorts.contains($0.port) }
 
         let hasProjectContext =
             ((process.cwd?.hasPrefix("/Users/") == true) && process.cwd != "/") ||
@@ -379,8 +387,12 @@ struct ProcessScanner {
         let looksLikeBackendEntry =
             nodeBackendHints.contains { haystack.contains($0) } ||
             haystack.range(of: #"\b(src|app|server|index)\.(js|mjs|cjs|ts)\b"#, options: .regularExpression) != nil
-        let ignored = ignoreCommandHints.contains { haystack.contains($0) }
+        let ignored = ignoreCommandHints.contains { nameAndCommand.contains($0) }
         let classified = classify(name: process.name, command: process.command, cwd: process.cwd)
+
+        if hasTypicalDevPort {
+            return true
+        }
 
         return !ignored &&
             hasProjectContext &&
