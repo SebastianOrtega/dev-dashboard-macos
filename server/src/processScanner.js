@@ -265,8 +265,13 @@ function classifyProcess(processInfo) {
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
+  const nameAndCommand = [processInfo.name, processInfo.command]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const hasTypicalDevPort = processInfo.ports.some((socket) => TYPICAL_DEV_PORTS.has(socket.port));
 
-  const isIgnored = matchesAny(haystack, IGNORE_COMMAND_HINTS);
+  const isIgnored = matchesAny(nameAndCommand, IGNORE_COMMAND_HINTS);
   const isVite =
     matchesAny(haystack, FRONTEND_HINTS.filter((item) => item.includes("vite"))) ||
     /\bvite\b/.test(haystack);
@@ -301,11 +306,14 @@ function classifyProcess(processInfo) {
   }
 
   const isDevelopmentProcess =
-    !isIgnored &&
-    hasProjectContext &&
-    (appType !== "unknown" ||
-      isPythonServer ||
-      (matchesAny(haystack, GENERIC_DEV_HINTS) && looksLikeBackendEntry));
+    hasTypicalDevPort ||
+    (
+      !isIgnored &&
+      hasProjectContext &&
+      (appType !== "unknown" ||
+        isPythonServer ||
+        (matchesAny(haystack, GENERIC_DEV_HINTS) && looksLikeBackendEntry))
+    );
 
   return {
     appType,

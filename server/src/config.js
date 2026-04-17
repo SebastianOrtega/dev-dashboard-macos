@@ -6,6 +6,8 @@ export const EXCLUDED_PORTS = new Set([7000, 7001]);
 export const TYPICAL_DEV_PORTS = new Set([
   3000,
   3001,
+  3002,
+  3333,
   4000,
   4100,
   4173,
@@ -14,9 +16,15 @@ export const TYPICAL_DEV_PORTS = new Set([
   5000,
   5173,
   5174,
+  5175,
+  5500,
+  6006,
   8000,
   8080,
-  8787
+  8081,
+  8787,
+  8888,
+  9000
 ]);
 
 export const FRONTEND_HINTS = [
