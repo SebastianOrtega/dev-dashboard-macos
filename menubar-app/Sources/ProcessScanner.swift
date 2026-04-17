@@ -390,12 +390,15 @@ struct ProcessScanner {
         let ignored = ignoreCommandHints.contains { nameAndCommand.contains($0) }
         let classified = classify(name: process.name, command: process.command, cwd: process.cwd)
 
+        if ignored {
+            return false
+        }
+
         if hasTypicalDevPort {
             return true
         }
 
-        return !ignored &&
-            hasProjectContext &&
+        return hasProjectContext &&
             (
                 classified.appType != "unknown" ||
                 (haystack.contains("python") && pythonServerHints.contains { haystack.contains($0) }) ||
