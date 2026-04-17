@@ -306,13 +306,15 @@ function classifyProcess(processInfo) {
   }
 
   const isDevelopmentProcess =
-    hasTypicalDevPort ||
+    !isIgnored &&
     (
-      !isIgnored &&
-      hasProjectContext &&
-      (appType !== "unknown" ||
-        isPythonServer ||
-        (matchesAny(haystack, GENERIC_DEV_HINTS) && looksLikeBackendEntry))
+      hasTypicalDevPort ||
+      (
+        hasProjectContext &&
+        (appType !== "unknown" ||
+          isPythonServer ||
+          (matchesAny(haystack, GENERIC_DEV_HINTS) && looksLikeBackendEntry))
+      )
     );
 
   return {
